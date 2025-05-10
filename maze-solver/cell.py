@@ -1,41 +1,57 @@
 from line import Line
 from point import Point
 class Cell:
-    def __init__(self, p1, p2, window):
-        self._x1 = p1.x
-        self._x2 = p2.x
-        self._y1 = p1.y
-        self._y2 = p2.y
+    def __init__(self, window=None):
+        self._x1 = None
+        self._x2 = None
+        self._y1 = None
+        self._y2 = None
         self.has_left_wall = True
         self.has_right_wall = True
         self.has_top_wall = True
         self.has_bot_wall = True
         self._win = window
-        self.top_left, self.bot_right = self.find_corners(self._x1, self._x2, self._y1, self._y2)
+        visited = False
 
-    def draw(self, top_left, bot_right,):
-        top_right = Point(bot_right.x, top_left.y)
-        bot_left = Point(top_left.x, bot_right.y)
+
+    def draw(self, x1, y1, x2, y2):
+        self._x1 = x1
+        self._x2 = x2
+        self._y1 = y1
+        self._y2 = y2
         if self.has_left_wall:
-            self._win.draw_line(Line(top_left, bot_left))
+            line = Line(Point(x1, y1), Point(x1, y2))
+            self._win.draw_line(line)
+        else:
+            line = Line(Point(x1, y1), Point(x1, y2))
+            self._win.draw_line(line, color="white")
         if self.has_top_wall:
-            self._win.draw_line(Line(top_left, top_right))
+            line = Line(Point(x1, y1), Point(x2, y1))
+            self._win.draw_line(line)
+        else:
+            line = Line(Point(x1, y1), Point(x2, y1))
+            self._win.draw_line(line, color="white")
         if self.has_right_wall:
-            self._win.draw_line(Line(top_right, bot_right))
+            line = Line(Point(x2, y1), Point(x2, y2))
+            self._win.draw_line(line)
+        else:
+            line = Line(Point(x2, y1), Point(x2, y2))
+            self._win.draw_line(line, color="white")
         if self.has_bot_wall:
-            self._win.draw_line(Line(bot_left, bot_right))
+            line = Line(Point(x1, y2), Point(x2, y2))
+            self._win.draw_line(line)
+        else:
+            line = Line(Point(x1, y2), Point(x2, y2))
+            self._win.draw_line(line, color="white")
 
-    def find_corners(self, x1, x2, y1, y2):
-        if x1 < x2:
-            l_x = x1
-            r_x = x2
+    
+    def draw_move(self, to_cell, undo=False):
+        center_x = self._x1 + ((self._x2 - self._x1) // 2)
+        center_y = self._y1 + ((self._y2 - self._y1) // 2)
+        target_x = to_cell._x1 + ((to_cell._x2 - to_cell._x1) // 2)
+        target_y = to_cell._y1 + ((to_cell._y2 - to_cell._y1) // 2)
+        line = Line(Point(center_x, center_y), Point(target_x, target_y))
+        if undo == False:
+            self._win.draw_line(line, color="red")
         else:
-            l_x = x2
-            r_x = x1
-        if y1 > y2:
-            u_y = y1
-            b_y = y2
-        else:
-            u_y = y2
-            b_y = y1
-        return Point(l_x, u_y), Point(r_x, b_y)
+            self._win.draw_line(line, color="grey")
