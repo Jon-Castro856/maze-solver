@@ -10,8 +10,11 @@ class Maze:
         self.cell_size_x = cell_size_x
         self.cell_size_y = cell_size_y
         self._win = win
+        self.seed = True
+        if self.seed:
+            random.seed()
         self._create_cells()
-        self._break_walls()
+        self._break_walls(i=0, j=0)
 
     def _create_cells(self):
         self._cells = []
@@ -51,4 +54,78 @@ class Maze:
         start.has_left_wall = False
         end.has_right_wall = False
     
-    def break_walls(self, i, j):
+    def _break_walls(self, i, j):
+        cell = self._cells[i][j]
+        cell.visited = True
+
+        while True:
+            print("comparing neighbors")
+            neighbors = []
+            if i != 0:
+                if j != 0:
+                    neighbor = self._cells[i][j-1]
+                    if neighbor.visited == False:
+                        print("unvisited neighbor, adding to list")
+                        neighbors.append((i, j-1))
+
+                neighbor = self._cells[i-1][j]
+                if neighbor.visited == False:
+                    print("unvisited neighbor, adding to list")
+                    neighbors.append((i-1, j))
+
+            if i != len(self._cells) - 1:
+                if j != len(self._cells[i]) - 1:
+                    neighbor = self._cells[i][j+1]
+                    if neighbor.visited == False:
+                        print("unvisited neighbor, adding to list")
+                        neighbors.append((i, j+1))
+                
+                neighbor = self._cells[i+1][j]
+                if neighbor.visited == False:
+                    print("unvisited neighbor, adding to list")
+                    neighbors.append((i+1, j))
+
+            if len(neighbors) == 0:
+                print("no valid neighbors")
+                self._draw_cell(i, j)
+                return
+            
+            print(f"neighbor contains: {neighbors}")
+            if len(neighbors) > 1:
+                print("picking a random direction")
+                direction = random.randrange(len(neighbors))
+                print(f"selected {direction}")
+            else:
+                direction = 0
+            new_i, new_j = neighbors[direction]
+            print(f"selected direction is {neighbors[direction]}")
+            if new_i > i:
+                print("moving to the right")
+                cell.has_right_wall = False
+                new_cell = self._cells[new_i][j]
+                new_cell.has_left_wall = False
+                self._break_walls(new_i, j)
+            
+            elif new_i < i:
+                print("moving to the left")
+                cell.has_left_wall = False
+                new_cell = self._cells[new_i][j]
+                new_cell.has_right_wall = False
+                self._break_walls(new_i, j)
+            
+            elif new_j > j:
+                print("moving down")
+                cell.has_bot_wall = False
+                new_cell = self._cells[i][new_j]
+                new_cell.has_top_wall = False
+                self._break_walls(i, new_j)
+
+            elif new_j < j:
+                print("moving up")
+                cell.has_top_wall = False
+                new_cell = self._cells[i][new_j]
+                new_cell.has_bot_wall = False
+                self._break_walls(i, new_j)
+
+            
+
