@@ -13,8 +13,11 @@ class Maze:
         self.seed = True
         if self.seed:
             random.seed()
+            
         self._create_cells()
         self._break_walls(i=0, j=0)
+        self._reset_visit()
+        
 
     def _create_cells(self):
         self._cells = []
@@ -127,5 +130,46 @@ class Maze:
                 new_cell.has_bot_wall = False
                 self._break_walls(i, new_j)
 
-            
+    def _reset_visit(self):
+        for i in range(0, len(self._cells)):
+            for j in range(0, len(self._cells[i])):
+                self._cells[i][j].visited = False
+
+    def solve(self):
+        return self._solve_r(i=0, j=0)
+    
+    def _solve_r(self, i, j):
+        self._animate()
+        current_cell = self._cells[i][j]
+        print(f"current location is [{i},{j}]")
+        current_cell.visited = True
+        if i == len(self._cells) - 1 and j == len(self._cells[i]) - 1:
+            print("found the end!")
+            return True
+        
+        if i > 0 and not current_cell.has_left_wall and not self._cells[i-1][j].visited:
+            current_cell.draw_move(self._cells[i-1][j])
+            if self._solve_r(i-1, j):
+                return True
+            current_cell.draw_move(self._cells[i-1][j], undo=True)
+
+        if j > 0 and not current_cell.has_top_wall and not self._cells[i][j-1].visited:
+            current_cell.draw_move(self._cells[i][j-1])
+            if self._solve_r(i, j-1):
+                return True
+            current_cell.draw_move(self._cells[i][j-1], undo=True)
+        
+        if i < len(self._cells)-1 and not current_cell.has_right_wall and not self._cells[i+1][j].visited:
+            current_cell.draw_move(self._cells[i+1][j])
+            if self._solve_r(i+1, j):
+                return True
+            current_cell.draw_move(self._cells[i+1][j], undo=True)
+        
+        if j < len(self._cells)-1 and not current_cell.has_bot_wall and not self._cells[i][j+1].visited:
+            current_cell.draw_move(self._cells[i][j+1])
+            if self._solve_r(i, j+1):
+                return True
+            current_cell.draw_move(self._cells[i][j+1], undo=True)
+
+        return False
 
